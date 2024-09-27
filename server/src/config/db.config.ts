@@ -1,6 +1,6 @@
 export default {
     HOST: "localhost",
     USER: "root",
-    PASSWORD: "1234",
+    PASSWORD: "Mysql123",
     DB: "quizz"
 };
