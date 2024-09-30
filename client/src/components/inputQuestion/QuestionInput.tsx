@@ -12,6 +12,7 @@ type Props = {
     onSubmit: (answer: string) => void;
     questionNr:number;
     images:boolean,
+    totalQuestions:number;
 };
 
 const InputCard: React.FC<Props> = ({
@@ -20,6 +21,7 @@ const InputCard: React.FC<Props> = ({
                                         onSubmit,
                                         questionNr,
                                         images,
+                                        totalQuestions
                                     }) => {
     const [inputValue, setInputValue] = useState('');
     const [valid,setValidValue]= useState(true);
@@ -33,7 +35,7 @@ const InputCard: React.FC<Props> = ({
 
         <div><CollumnWrapper>
             <p className="number">
-                Question : {questionNr}
+            Question : {questionNr}/ {totalQuestions}
             </p>
 
             <p dangerouslySetInnerHTML={{ __html: question }}></p>

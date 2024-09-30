@@ -13,6 +13,7 @@ import {Simulate} from "react-dom/test-utils";
 import {ServerAnswer} from "../../model/ServerAnswer";
 import QuestionInput from "../inputQuestion/QuestionInput";
 
+const TOTAL_QUESTIONS = 1;
 
 export type AnswerObject ={
     question:string;
@@ -40,6 +41,8 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
     const [timer, setTimer] = useState<number>(30); // Example: 30 seconds
     const [isTimerActive, setIsTimerActive] = useState<boolean>(false);
     const [timerRanOut, setTimerRanOut] = useState(false);
+    const [showResult, setShowResult] = useState(false);
+
 
 
     var currentQuestion = questions[number]; // Updated the current question assignment
@@ -121,6 +124,9 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                         timedOut: false,
                     };
                     setUserAnswers((prev) => [...prev, answerObject]);
+                    if(isLastQuestion())
+                        setShowResult(true);
+
 
         }catch (error) {console.log(error);}
 
@@ -157,6 +163,9 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                     timedOut: false,
                 };
                 setUserAnswers((prev) => [...prev, answerObject]);
+                if(isLastQuestion())
+                    setShowResult(true)
+        
 
             } catch (error) {
                 console.error('Error checking answer:', error);
@@ -164,6 +173,7 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
         }
     };
 
+    
     const callApiOnTimeout = async () => {
         try {
                 var serverAnswer:ServerAnswer;
@@ -183,11 +193,14 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
             };
             setUserAnswers((prev) => [...prev, answerObject]);
             setTimerRanOut(true);
+            if(isLastQuestion())
+                setShowResult(true);
 
         } catch (error) {
             console.error('Error:', error);
         }
     };
+
 
     useEffect(() => {
         let timerId: NodeJS.Timeout;
@@ -208,6 +221,31 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
         return () => clearInterval(timerId);
     }, [isTimerActive]);
 
+    const isLastQuestion = ()=>{
+        if(number === TOTAL_QUESTIONS - 1)
+                return true;
+        else return false;
+  }
+  const restartGame=()=>{
+      if(isLastQuestion()){
+          setShowResult(false);
+      }
+      setGameOver(true);
+  }
+  const nextQuestion = () => {
+      const nextQuestion = number + 1;
+      if(nextQuestion===TOTAL_QUESTIONS){
+          setGameOver(true);
+      } else{
+          setNumber(nextQuestion);
+          setTimerRanOut(false);
+          currentQuestion=questions[nextQuestion];
+          setClickState(determineQuestionType(currentQuestion) === 'WordGeneratingQuestion'?false:
+              determineQuestionType(currentQuestion) !== 'FlagGuessingQuestion' );
+          startTimer(questions[nextQuestion].timeLimit);
+      }
+  };
+  function test(s:string){console.log("hii");}
 
 
     
@@ -228,7 +266,8 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                         userAnswer={userAnswers ? userAnswers[number] : undefined}
                         onSubmit={checkSubmit}
                         questionNr={number + 1}
-                        images={true}                       
+                        images={true}   
+                        totalQuestions={TOTAL_QUESTIONS}                    
                     />
                 </>
             )}
@@ -243,9 +282,28 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                         userAnswer={userAnswers ? userAnswers[number] : undefined}
                         callback={checkAnswer}
                         images={true}
+                        totalQuestions={TOTAL_QUESTIONS}
                     />
                 </>
             )}
+             {!gameOver && !loading && userAnswers.length === number + 1 && !isLastQuestion() ? (
+                <button className="next" onClick={nextQuestion}>
+                    Next Question
+                </button>
+            ) : null}
+            {showResult && (
+                <>
+                <button className="next" onClick={restartGame}>
+                    Try Again
+                </button>
+                </>
+            )}
+
+            {timerRanOut && !isLastQuestion() ?(
+                <button className="next" onClick={nextQuestion}>
+                    Next Question
+                </button>
+            ) : null}
         </div>
     );
 };

@@ -12,6 +12,7 @@ type Props ={
     questionNr:number;
     images:boolean;
     expression:string;
+    totalQuestions:number;
 }
 
 const QuestionCard: React.FC<Props> = ({
@@ -21,12 +22,13 @@ const QuestionCard: React.FC<Props> = ({
                                            userAnswer,
                                            questionNr,
                                            images,
-                                           expression
+                                           expression,
+                                           totalQuestions
                                        }) => (
 
     <Wrapper>
         <p className="number">
-            Question : {questionNr}
+            Question : {questionNr} / {totalQuestions}
         </p>
 
         <p>{question}</p>
