@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {GlobalStyle, Wrapper} from "./APP.syles";
 import Login from "./components/LoginComponent/LoginComponent";
 import Register from "./components/registerComponent/registerComponent";
+import Quiz, {AnswerObject} from "./components/quizz/Quizz";
 
 
 const App = () => {
@@ -36,6 +37,13 @@ const App = () => {
 
                 {!logged && showRegister && (
                     <Register onRegister={toggleForm} toggleForm={toggleForm} />
+                )}
+
+                {logged &&(
+                    <>
+                    <h1>Quiz</h1>
+                    <Quiz startTrivia={() => {}} score={score} setScore={setScore}/>
+                    </>
                 )}
             </Wrapper>
         </>
