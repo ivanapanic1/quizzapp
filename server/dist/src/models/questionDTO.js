@@ -6,7 +6,8 @@ function convertToDTO(question) {
         id: question.id,
         questionText: question.questionText,
         expression: question.expression,
-        options: question.options
+        options: question.options,
+        timeLimit: question.timeLimit
     };
     return dto;
 }

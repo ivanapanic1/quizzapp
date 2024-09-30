@@ -37,6 +37,7 @@ const QuestionCard: React.FC<Props> = ({
                     key={answer}
                     $correct={userAnswer?.correctAnswer === answer.toString()}
                     $userClicked={userAnswer?.answer === answer.toString()}
+                    $timedout={userAnswer? userAnswer.timedOut:false}
                 >
                     <button
                         disabled={userAnswer ? true : false}

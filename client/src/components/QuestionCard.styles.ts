@@ -17,6 +17,7 @@ export const Wrapper = styled.div`
 type ButtonWrapperProps = {
     $correct: boolean;
     $userClicked: boolean;
+    $timedout:boolean;
 };
 
 export const ButtonWrapper = styled.div<ButtonWrapperProps>`
@@ -36,12 +37,14 @@ export const ButtonWrapper = styled.div<ButtonWrapperProps>`
 
 
 
-    background: ${({ $correct, $userClicked }) =>
-              $correct
-                            ? 'linear-gradient(90deg, #56FFA4, #59BC86)' // Green for correct answers
-                            : $userClicked && !$correct
-                                    ? 'linear-gradient(90deg, #FF5656, #C16868)' // Red for wrong answers selected by the user
-                                    : $userClicked && $correct
+    background: ${({ $correct, $userClicked, $timedout }) =>
+      $timedout && $correct
+              ? 'linear-gradient(90deg, #56FFA4, #59BC86)' // Green for correct answers when timed out
+              : $correct
+                      ? 'linear-gradient(90deg, #56FFA4, #59BC86)' // Green for correct answers
+                      : $userClicked && !$correct
+                                   ? 'linear-gradient(90deg, #FF5656, #C16868)' // Red for wrong answers selected by the user
+                                  : $userClicked && $correct
                                             ? 'linear-gradient(90deg, #56FFA4, #59BC86)' // Green for correct answers selected by the user
                                             : 'linear-gradient(90deg, #56ccff, #6eafb4)'}; // Default color
 

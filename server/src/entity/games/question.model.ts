@@ -5,5 +5,6 @@ export default interface Question extends RowDataPacket {
     id?: string;
     questionText?: string;
     correctAnswer?: string;
+    timeLimit?: number;
     points?: number;
 }

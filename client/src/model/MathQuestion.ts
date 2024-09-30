@@ -3,6 +3,7 @@ export class Question {
     questionText!: string;
     correctAnswer!: string;
     points!: number;
+    timeLimit!: number;
 }
 export class MathQuestion extends Question{
     expression!: string ;

@@ -19,6 +19,7 @@ export type AnswerObject ={
     answer:string;
     correct:boolean;
     correctAnswer:string;
+    timedOut:boolean;
 }
 
 
@@ -36,6 +37,9 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
     const [gameOver, setGameOver] = useState(true);
     const [clickedAnswer, setClickedAnswer] = useState<string | null>(null);
     const [clickState, setClickState] = useState(true);
+    const [timer, setTimer] = useState<number>(30); // Example: 30 seconds
+    const [isTimerActive, setIsTimerActive] = useState<boolean>(false);
+    const [timerRanOut, setTimerRanOut] = useState(false);
 
 
     var currentQuestion = questions[number]; // Updated the current question assignment
@@ -61,6 +65,15 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
         }
     };
 
+    const startTimer = (timeLimit: number) => {
+        setTimer(timeLimit);
+        setIsTimerActive(true); // Start the timer
+    };
+
+    const stopTimer = () => {
+        setIsTimerActive(false); // Stop the timer
+    };
+
     const startQuiz = async () => {
         setLoading(true);
         setQuestions([])
@@ -75,12 +88,14 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
         q.push(newQuestion);
  
         setQuestions(q);
+        startTimer(q[0].timeLimit);
         setNumber(0)
         setLoading(false);
         setGameOver(false);
     };
 
     const checkSubmit = async (answer:string)=> {
+        stopTimer();
 
         const newAnswer: AnswerDto = {questionId: questions[number].id, answer: answer};
 
@@ -103,6 +118,7 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                         answer,
                         correct,
                         correctAnswer: serverAnswer!.correctAnswer,
+                        timedOut: false,
                     };
                     setUserAnswers((prev) => [...prev, answerObject]);
 
@@ -112,6 +128,8 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
 
     const checkAnswer = async (e: React.MouseEvent<HTMLButtonElement>) => {
         if (!gameOver) {
+            stopTimer();
+
             const answer = e.currentTarget.value;
             setClickedAnswer(answer);
 
@@ -136,6 +154,7 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                     answer,
                     correct,
                     correctAnswer: serverAnswer!.correctAnswer,
+                    timedOut: false,
                 };
                 setUserAnswers((prev) => [...prev, answerObject]);
 
@@ -144,6 +163,51 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
             }
         }
     };
+
+    const callApiOnTimeout = async () => {
+        try {
+                var serverAnswer:ServerAnswer;
+                switch (determineQuestionType(currentQuestion)) {
+                    case 'MathQuestion':
+                        serverAnswer = await checkAnswerCallMath({ questionId: questions[number].id, answer: 'xd' });
+                        break;
+                    default:
+                        console.error('Unknown question type');
+                }
+            const answerObject: AnswerObject = {
+                question: questions[number].questionText,
+                answer: 'xd',
+                correct: false,
+                correctAnswer: serverAnswer!.correctAnswer,
+                timedOut: true,
+            };
+            setUserAnswers((prev) => [...prev, answerObject]);
+            setTimerRanOut(true);
+
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
+    useEffect(() => {
+        let timerId: NodeJS.Timeout;
+
+        if (isTimerActive) {
+            timerId = setInterval(() => {
+                setTimer((prev) => {
+                    if (prev === 1) {
+                        setIsTimerActive(false);
+                        callApiOnTimeout();
+                        clearInterval(timerId);
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+
+        return () => clearInterval(timerId);
+    }, [isTimerActive]);
+
 
 
     
@@ -158,6 +222,7 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
             {loading && <p>Loading Questions ...</p>}
             {!loading && !gameOver && !clickState && (
                 <>
+                    <p style={{ color: 'white' }}>Time left: {timer} seconds</p>
                     <QuestionInput
                         question={questions[number].questionText}
                         userAnswer={userAnswers ? userAnswers[number] : undefined}
@@ -169,6 +234,7 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
             )}
             {!loading && !gameOver && clickState && (
                 <>
+                    <p style={{ color: 'white' }}>Time left: {timer} seconds</p>
                     <QuestionCard
                         questionNr={number + 1}
                         question={questions[number].questionText}

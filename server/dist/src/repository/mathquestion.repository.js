@@ -24,7 +24,7 @@ class MathQuestionRepository {
         return Promise.resolve([]);
     }
     retrieveById(questionId) {
-        let query = "SELECT q.id, q.questionText, q.correctAnswer, q.points, mq.expression, mq.options " +
+        let query = "SELECT q.id, q.questionText, q.correctAnswer, q.timeLimit, q.points, mq.expression, mq.options " +
             "FROM Question q JOIN MathQuestion mq ON q.id = mq.id WHERE q.id = ?;";
         return new Promise((resolve, reject) => {
             db_1.default.query(query, questionId, (err, res) => {
@@ -54,7 +54,7 @@ class MathQuestionRepository {
     }
     save(question) {
         return new Promise((resolve, reject) => {
-            db_1.default.query("INSERT INTO Question (id, questionText, correctAnswer, points) VALUES(?,?,?,?)", [question.id, question.questionText, question.correctAnswer, question.points], (err, res) => {
+            db_1.default.query("INSERT INTO Question (id, questionText, correctAnswer, timeLimit, points) VALUES(?,?,?,?,?)", [question.id, question.questionText, question.correctAnswer, question.timeLimit, question.points], (err, res) => {
                 if (err) {
                     console.log(err);
                     console.log("error in creating base question");

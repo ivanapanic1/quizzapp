@@ -28,7 +28,7 @@ class MathQuestionRepository implements IMathQuestionRepository{
 
 
     retrieveById(questionId: string): Promise<MathQuestion | undefined> {
-        let query: string="SELECT q.id, q.questionText, q.correctAnswer, q.points, mq.expression, mq.options " +
+        let query: string="SELECT q.id, q.questionText, q.correctAnswer, q.timeLimit, q.points, mq.expression, mq.options " +
             "FROM Question q JOIN MathQuestion mq ON q.id = mq.id WHERE q.id = ?;"
         return new Promise((resolve,reject)=>{
             connection.query<MathQuestion[]>(query,questionId,(err,res)=>{
@@ -49,8 +49,8 @@ class MathQuestionRepository implements IMathQuestionRepository{
     save(question: MathQuestion): Promise<MathQuestion> {
         return new Promise((resolve, reject) => {
             connection.query<OkPacket>(
-                "INSERT INTO Question (id, questionText, correctAnswer, points) VALUES(?,?,?,?)",
-                [question.id, question.questionText,question.correctAnswer,question.points],
+                "INSERT INTO Question (id, questionText, correctAnswer, timeLimit, points) VALUES(?,?,?,?,?)",
+                [question.id, question.questionText,question.correctAnswer,question.timeLimit,question.points],
                 (err, res) => {
                     if (err){console.log(err); console.log("error in creating base question");  reject(err);}
                     else

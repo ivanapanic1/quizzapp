@@ -5,6 +5,7 @@ export interface mathQuestionDTO{
     questionText?: string;
     expression?: string ;
     options?: number[];
+    timeLimit?: number;
 }
 
 export interface userAnswer{
@@ -23,7 +24,8 @@ export function convertToDTO(question:MathQuestion):mathQuestionDTO{
         id: question.id,
         questionText: question.questionText,
         expression: question.expression,
-        options: question.options
+        options: question.options,
+        timeLimit: question.timeLimit
     };
 
     return dto;
