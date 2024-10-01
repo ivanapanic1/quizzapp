@@ -6,11 +6,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const home_routes_1 = __importDefault(require("./routers/home.routes"));
 const user_routes_1 = __importDefault(require("./routers/user.routes"));
 const mathQuestion_routes_1 = __importDefault(require("./routers/mathQuestion.routes"));
+const CountryMatching_routes_1 = __importDefault(require("./routers/CountryMatching.routes"));
 class Routes {
     constructor(app) {
         app.use("/api", home_routes_1.default);
         app.use("/api/users", user_routes_1.default);
         app.use("/api/math", mathQuestion_routes_1.default);
+        app.use("/api/country", CountryMatching_routes_1.default);
     }
 }
 exports.default = Routes;

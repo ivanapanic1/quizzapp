@@ -1,7 +1,7 @@
 import {shuffleArray} from "./utils";
 import {
+    CountryFlagMatchingQuestion,
     MathQuestion,
-    Question
 } from "./model/MathQuestion";
 import {AnswerDto} from "./model/AnswerDTO";
 import {ServerAnswer} from "./model/ServerAnswer";
@@ -16,6 +16,21 @@ export class RegisterDTO{
     password?: string;
 }
 
+export async function fetchCountryQuestion():Promise<CountryFlagMatchingQuestion>{
+    try {
+        const response  = await fetch(`http://localhost:8080/api/country/random`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const question:CountryFlagMatchingQuestion=await response.json();
+        return Promise.resolve(question);
+    }
+    catch (error) {
+        throw (error)
+    }
+}
 
 export async function fetchMathQuestion():Promise<MathQuestion>{
     try {
@@ -50,7 +65,22 @@ export async function checkAnswerCallMath(answer:AnswerDto):Promise<ServerAnswer
         throw (error)
     }
 }
-
+export async function checkAnswerCallCountry(answer:AnswerDto):Promise<ServerAnswer>{
+    try {
+        const response  = await fetch(`http://localhost:8080/api/country/check`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(answer)
+        });
+        const serverAnswer:ServerAnswer=await response.json()
+        return Promise.resolve(serverAnswer);
+    }
+    catch (error) {
+        throw (error)
+    }
+}
 
 export async function loginCall(user:LoginDTO): Promise<any>{
         const response  = await fetch(`http://localhost:8080/api/users/login`, {
@@ -88,7 +118,3 @@ export async function RegisterCall(user:RegisterDTO): Promise<any>{
         alert("Logged in successfully");
         }
 }
-
-
-
-

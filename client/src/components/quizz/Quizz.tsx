@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
+    checkAnswerCallCountry,
     checkAnswerCallMath,
+    fetchCountryQuestion,
     fetchMathQuestion
 } from '../../API';
 import {
+    CountryFlagMatchingQuestion,
     MathQuestion,
-    Question
+    Question,
 } from "../../model/MathQuestion";
 import {AnswerDto} from "../../model/AnswerDTO";
 import QuestionCard from "../QuestionCard";
@@ -13,7 +16,7 @@ import {Simulate} from "react-dom/test-utils";
 import {ServerAnswer} from "../../model/ServerAnswer";
 import QuestionInput from "../inputQuestion/QuestionInput";
 
-const TOTAL_QUESTIONS = 1;
+const TOTAL_QUESTIONS = 2;
 
 export type AnswerObject ={
     question:string;
@@ -37,12 +40,11 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
     const [userAnswers, setUserAnswers] = useState<AnswerObject[]>([]);
     const [gameOver, setGameOver] = useState(true);
     const [clickedAnswer, setClickedAnswer] = useState<string | null>(null);
-    const [clickState, setClickState] = useState(true);
     const [timer, setTimer] = useState<number>(30); // Example: 30 seconds
     const [isTimerActive, setIsTimerActive] = useState<boolean>(false);
     const [timerRanOut, setTimerRanOut] = useState(false);
+    const [clickState, setClickState] = useState(true);
     const [showResult, setShowResult] = useState(false);
-
 
 
     var currentQuestion = questions[number]; // Updated the current question assignment
@@ -51,19 +53,26 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
         return (question as MathQuestion).options !== undefined;
 
     };
+    const isCountryFlagMatchingQuestion = (question: Question | CountryFlagMatchingQuestion): question is CountryFlagMatchingQuestion => {
+        if(question===undefined) return false;
+        return (question as CountryFlagMatchingQuestion).flagOptions !== undefined;
 
-
+    };
 
 
     const answers =
         isMathQuestion(currentQuestion) ? currentQuestion.options :
+            isCountryFlagMatchingQuestion(currentQuestion)? currentQuestion.flagOptions:
             [];
+
     const expression =isMathQuestion(currentQuestion)?currentQuestion.expression:"";
 
     const determineQuestionType = (question: Question): string => {
         switch (true) {
             case isMathQuestion(question):
                 return 'MathQuestion';
+            case isCountryFlagMatchingQuestion(question):
+                return 'CountryFlagMatchingQuestion';
             default: return ""
         }
     };
@@ -86,10 +95,12 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
 
 
         const newQuestion = await fetchMathQuestion()
+        const countryQuestion:CountryFlagMatchingQuestion = await fetchCountryQuestion();
         const q: Question[] = [];
 
         q.push(newQuestion);
- 
+        q.push(countryQuestion);
+
         setQuestions(q);
         startTimer(q[0].timeLimit);
         setNumber(0)
@@ -107,6 +118,9 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
             switch (determineQuestionType(currentQuestion)) {
                 case 'MathQuestion':
                     serverAnswer = await checkAnswerCallMath(newAnswer);
+                    break;
+                case 'CountryFlagMatchingQuestion':
+                    serverAnswer = await checkAnswerCallCountry(newAnswer);
                     break;
             }
                     let correct = false;
@@ -127,7 +141,6 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                     if(isLastQuestion())
                         setShowResult(true);
 
-
         }catch (error) {console.log(error);}
 
     }
@@ -135,7 +148,6 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
     const checkAnswer = async (e: React.MouseEvent<HTMLButtonElement>) => {
         if (!gameOver) {
             stopTimer();
-
             const answer = e.currentTarget.value;
             setClickedAnswer(answer);
 
@@ -146,6 +158,9 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                 switch (determineQuestionType(currentQuestion)) {
                     case 'MathQuestion':
                         serverAnswer = await checkAnswerCallMath(newAnswer);
+                        break;
+                    case 'CountryFlagMatchingQuestion':
+                        serverAnswer = await checkAnswerCallCountry(newAnswer);
                         break;
                 }
                 let correct = false;
@@ -163,9 +178,9 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                     timedOut: false,
                 };
                 setUserAnswers((prev) => [...prev, answerObject]);
+
                 if(isLastQuestion())
-                    setShowResult(true)
-        
+                setShowResult(true)
 
             } catch (error) {
                 console.error('Error checking answer:', error);
@@ -173,13 +188,15 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
         }
     };
 
-    
     const callApiOnTimeout = async () => {
         try {
                 var serverAnswer:ServerAnswer;
                 switch (determineQuestionType(currentQuestion)) {
                     case 'MathQuestion':
                         serverAnswer = await checkAnswerCallMath({ questionId: questions[number].id, answer: 'xd' });
+                        break;
+                    case 'CountryFlagMatchingQuestion':
+                        serverAnswer = await checkAnswerCallCountry({ questionId: questions[number].id, answer: 'xd' });
                         break;
                     default:
                         console.error('Unknown question type');
@@ -201,7 +218,6 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
         }
     };
 
-
     useEffect(() => {
         let timerId: NodeJS.Timeout;
 
@@ -222,33 +238,29 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
     }, [isTimerActive]);
 
     const isLastQuestion = ()=>{
-        if(number === TOTAL_QUESTIONS - 1)
-                return true;
-        else return false;
-  }
-  const restartGame=()=>{
-      if(isLastQuestion()){
-          setShowResult(false);
-      }
-      setGameOver(true);
-  }
-  const nextQuestion = () => {
-      const nextQuestion = number + 1;
-      if(nextQuestion===TOTAL_QUESTIONS){
-          setGameOver(true);
-      } else{
-          setNumber(nextQuestion);
-          setTimerRanOut(false);
-          currentQuestion=questions[nextQuestion];
-          setClickState(determineQuestionType(currentQuestion) === 'WordGeneratingQuestion'?false:
-              determineQuestionType(currentQuestion) !== 'FlagGuessingQuestion' );
-          startTimer(questions[nextQuestion].timeLimit);
-      }
-  };
-  function test(s:string){console.log("hii");}
+          if(number === TOTAL_QUESTIONS - 1)
+                  return true;
+          else return false;
+    }
+    const restartGame=()=>{
+        if(isLastQuestion()){
+            setShowResult(false);
+        }
+        setGameOver(true);
+    }
+    const nextQuestion = () => {
+        const nextQuestion = number + 1;
+        if(nextQuestion===TOTAL_QUESTIONS){
+            setGameOver(true);
+        } else{
+            setNumber(nextQuestion);
+            setTimerRanOut(false);
+            currentQuestion=questions[nextQuestion];
+            startTimer(questions[nextQuestion].timeLimit);
+        }
+    };
+    function test(s:string){console.log("hii");}
 
-
-    
     return (
         <div>
             {gameOver ?(
@@ -266,8 +278,10 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                         userAnswer={userAnswers ? userAnswers[number] : undefined}
                         onSubmit={checkSubmit}
                         questionNr={number + 1}
-                        images={true}   
-                        totalQuestions={TOTAL_QUESTIONS}                    
+                        totalQuestions={TOTAL_QUESTIONS}
+                        letters={answers}
+                        path={"1724604970120-austria.png"}
+                        images={true}
                     />
                 </>
             )}
@@ -276,17 +290,17 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                     <p style={{ color: 'white' }}>Time left: {timer} seconds</p>
                     <QuestionCard
                         questionNr={number + 1}
+                        totalQuestions={TOTAL_QUESTIONS}
                         question={questions[number].questionText}
                         expression={expression}
                         answers={answers!}
                         userAnswer={userAnswers ? userAnswers[number] : undefined}
                         callback={checkAnswer}
-                        images={true}
-                        totalQuestions={TOTAL_QUESTIONS}
+                        images={isCountryFlagMatchingQuestion(currentQuestion)}
                     />
                 </>
             )}
-             {!gameOver && !loading && userAnswers.length === number + 1 && !isLastQuestion() ? (
+            {!gameOver && !loading && userAnswers.length === number + 1 && !isLastQuestion() ? (
                 <button className="next" onClick={nextQuestion}>
                     Next Question
                 </button>

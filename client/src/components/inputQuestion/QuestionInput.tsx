@@ -13,6 +13,8 @@ type Props = {
     questionNr:number;
     images:boolean,
     totalQuestions:number;
+    letters:string[]
+    path:string| undefined,
 };
 
 const InputCard: React.FC<Props> = ({
@@ -21,15 +23,28 @@ const InputCard: React.FC<Props> = ({
                                         onSubmit,
                                         questionNr,
                                         images,
-                                        totalQuestions
+                                        totalQuestions,
+                                        letters,
+                                        path
                                     }) => {
     const [inputValue, setInputValue] = useState('');
     const [valid,setValidValue]= useState(true);
 
+    // Reset inputValue when question, letters, or images change
+    useEffect(() => {
+        setInputValue('');
+    }, [question]);
+
     const handleSubmit = () => {
+        if(inputValue===''){alert("This field can't be empty")};
         onSubmit(inputValue);
     };
    
+    const checkInputValidity = (input: string) => {
+        if(images) return true;
+      return valid;
+    };
+
     return (
         <Wrapper>
 
@@ -44,6 +59,14 @@ const InputCard: React.FC<Props> = ({
                 $correct={userAnswer?.correct}
                 $userClicked={!!userAnswer}
             >
+                 {images && (
+                    <ImageDisplay filePath={path!}></ImageDisplay>)}
+                 <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => {setInputValue(e.target.value);}}
+                    disabled={!!userAnswer}
+                    />
                 <button onClick={handleSubmit} disabled={!!userAnswer||!valid}>
                     Submit
                 </button>

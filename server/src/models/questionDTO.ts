@@ -1,4 +1,6 @@
 import MathQuestion from "../entity/games/MathQuestion";
+import CountryFlagMatchingQuestion from "../entity/games/CountryFlagMatchingQuestion";
+
 
 export interface mathQuestionDTO{
     id?:string;
@@ -6,6 +8,13 @@ export interface mathQuestionDTO{
     expression?: string ;
     options?: number[];
     timeLimit?: number;
+}
+
+export interface countryFlagMatchingQuestionDTO{
+    id?:string;
+    questionText?: string;
+    timeLimit?: number;
+    flagOptions?: string[];
 }
 
 export interface userAnswer{
@@ -26,6 +35,17 @@ export function convertToDTO(question:MathQuestion):mathQuestionDTO{
         expression: question.expression,
         options: question.options,
         timeLimit: question.timeLimit
+    };
+
+    return dto;
+}
+
+export function countryConvertToDTO(question:CountryFlagMatchingQuestion):countryFlagMatchingQuestionDTO{
+    const dto: countryFlagMatchingQuestionDTO = {
+        id: question.id,
+        questionText: question.questionText,
+        timeLimit: question.timeLimit,
+        flagOptions: question.flagOptions
     };
 
     return dto;

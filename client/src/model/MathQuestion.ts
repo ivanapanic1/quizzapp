@@ -9,3 +9,6 @@ export class MathQuestion extends Question{
     expression!: string ;
     options!: string[];
 }
+export class CountryFlagMatchingQuestion extends Question {
+    flagOptions!: string[];
+}
