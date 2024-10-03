@@ -2,13 +2,16 @@ import React, { useState, useEffect } from 'react';
 import {
     checkAnswerCallCountry,
     checkAnswerCallMath,
+    checkAnswerCallWord,
     fetchCountryQuestion,
-    fetchMathQuestion
+    fetchMathQuestion,
+    fetchWordQuestion
 } from '../../API';
 import {
     CountryFlagMatchingQuestion,
     MathQuestion,
     Question,
+    WordGeneratorGame
 } from "../../model/MathQuestion";
 import {AnswerDto} from "../../model/AnswerDTO";
 import QuestionCard from "../QuestionCard";
@@ -16,7 +19,7 @@ import {Simulate} from "react-dom/test-utils";
 import {ServerAnswer} from "../../model/ServerAnswer";
 import QuestionInput from "../inputQuestion/QuestionInput";
 
-const TOTAL_QUESTIONS = 2;
+const TOTAL_QUESTIONS = 3;
 
 export type AnswerObject ={
     question:string;
@@ -59,10 +62,15 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
 
     };
 
+    const isWordGeneratingQuestion = (question: Question | WordGeneratorGame): question is WordGeneratorGame => {
+        if(question===undefined) return false;
+        return (question as WordGeneratorGame).letters !== undefined;
+    };
 
     const answers =
         isMathQuestion(currentQuestion) ? currentQuestion.options :
             isCountryFlagMatchingQuestion(currentQuestion)? currentQuestion.flagOptions:
+                isWordGeneratingQuestion(currentQuestion)? currentQuestion.letters:
             [];
 
     const expression =isMathQuestion(currentQuestion)?currentQuestion.expression:"";
@@ -73,6 +81,8 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                 return 'MathQuestion';
             case isCountryFlagMatchingQuestion(question):
                 return 'CountryFlagMatchingQuestion';
+            case isWordGeneratingQuestion(question):
+                return 'WordGeneratingQuestion';
             default: return ""
         }
     };
@@ -96,10 +106,13 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
 
         const newQuestion = await fetchMathQuestion()
         const countryQuestion:CountryFlagMatchingQuestion = await fetchCountryQuestion();
+        const wordQuestion:WordGeneratorGame=await fetchWordQuestion();
         const q: Question[] = [];
 
         q.push(newQuestion);
         q.push(countryQuestion);
+        q.push(wordQuestion);
+
 
         setQuestions(q);
         startTimer(q[0].timeLimit);
@@ -122,6 +135,10 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                 case 'CountryFlagMatchingQuestion':
                     serverAnswer = await checkAnswerCallCountry(newAnswer);
                     break;
+                case 'WordGeneratingQuestion':
+                    serverAnswer = await checkAnswerCallWord(newAnswer);
+                    break;
+    
             }
                     let correct = false;
 
@@ -162,6 +179,10 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                     case 'CountryFlagMatchingQuestion':
                         serverAnswer = await checkAnswerCallCountry(newAnswer);
                         break;
+                    case 'WordGeneratingQuestion':
+                        serverAnswer = await checkAnswerCallWord(newAnswer);
+                        break;
+    
                 }
                 let correct = false;
 
@@ -198,6 +219,10 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                     case 'CountryFlagMatchingQuestion':
                         serverAnswer = await checkAnswerCallCountry({ questionId: questions[number].id, answer: 'xd' });
                         break;
+                    case 'WordGeneratingQuestion':
+                        serverAnswer = await checkAnswerCallWord({ questionId: questions[number].id, answer: 'xd' });
+                        break;
+    
                     default:
                         console.error('Unknown question type');
                 }
@@ -256,7 +281,7 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
             setNumber(nextQuestion);
             setTimerRanOut(false);
             currentQuestion=questions[nextQuestion];
-            startTimer(questions[nextQuestion].timeLimit);
+                        startTimer(questions[nextQuestion].timeLimit);
         }
     };
     function test(s:string){console.log("hii");}

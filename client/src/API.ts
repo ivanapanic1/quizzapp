@@ -2,6 +2,7 @@ import {shuffleArray} from "./utils";
 import {
     CountryFlagMatchingQuestion,
     MathQuestion,
+    WordGeneratorGame
 } from "./model/MathQuestion";
 import {AnswerDto} from "./model/AnswerDTO";
 import {ServerAnswer} from "./model/ServerAnswer";
@@ -14,6 +15,22 @@ export class RegisterDTO{
     username?:string;
     email?:string;
     password?: string;
+}
+
+export async function fetchWordQuestion():Promise<WordGeneratorGame>{
+    try {
+        const response  = await fetch(`http://localhost:8080/api/word/random`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const question:WordGeneratorGame=await response.json();
+        return Promise.resolve(question);
+    }
+    catch (error) {
+        throw (error)
+    }
 }
 
 export async function fetchCountryQuestion():Promise<CountryFlagMatchingQuestion>{
@@ -68,6 +85,23 @@ export async function checkAnswerCallMath(answer:AnswerDto):Promise<ServerAnswer
 export async function checkAnswerCallCountry(answer:AnswerDto):Promise<ServerAnswer>{
     try {
         const response  = await fetch(`http://localhost:8080/api/country/check`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(answer)
+        });
+        const serverAnswer:ServerAnswer=await response.json()
+        return Promise.resolve(serverAnswer);
+    }
+    catch (error) {
+        throw (error)
+    }
+}
+
+export async function checkAnswerCallWord(answer:AnswerDto):Promise<ServerAnswer>{
+    try {
+        const response  = await fetch(`http://localhost:8080/api/word/check`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

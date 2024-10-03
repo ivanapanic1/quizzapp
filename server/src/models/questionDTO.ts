@@ -17,6 +17,13 @@ export interface countryFlagMatchingQuestionDTO{
     flagOptions?: string[];
 }
 
+export interface wordGeneratorQuestionDTO{
+    id?:string;
+    questionText?: string;
+    timeLimit?: number;
+    letters?: string[];
+}
+
 export interface userAnswer{
     questionId:string;
     answer?: string;
@@ -46,6 +53,17 @@ export function countryConvertToDTO(question:CountryFlagMatchingQuestion):countr
         questionText: question.questionText,
         timeLimit: question.timeLimit,
         flagOptions: question.flagOptions
+    };
+
+    return dto;
+}
+
+export function wordGeneratorConvertToDTO(question:wordGeneratorQuestionDTO):wordGeneratorQuestionDTO{
+    const dto: wordGeneratorQuestionDTO = {
+        id: question.id,
+        questionText: question.questionText,
+        timeLimit: question.timeLimit,
+        letters:question.letters
     };
 
     return dto;
