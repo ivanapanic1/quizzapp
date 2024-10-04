@@ -3,6 +3,11 @@ import {GlobalStyle, Wrapper} from "./APP.syles";
 import Login from "./components/LoginComponent/LoginComponent";
 import Register from "./components/registerComponent/registerComponent";
 import Quiz, {AnswerObject} from "./components/quizz/Quizz";
+import CreateMathQuestion from "./components/createMathQuestionComponent/CreateMathQuestion.component";
+import CreateFlagMatchingQuestion
+    from "./components/createFlagMatchingQuestionComponent/flagMatchingQuestion.component";
+
+
 
 
 const App = () => {

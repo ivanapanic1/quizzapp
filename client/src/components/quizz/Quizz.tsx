@@ -18,6 +18,8 @@ import QuestionCard from "../QuestionCard";
 import {Simulate} from "react-dom/test-utils";
 import {ServerAnswer} from "../../model/ServerAnswer";
 import QuestionInput from "../inputQuestion/QuestionInput";
+import ComponentSelector from "../componentSelector/componentSelector";
+
 
 const TOTAL_QUESTIONS = 4;
 
@@ -48,6 +50,8 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
     const [timerRanOut, setTimerRanOut] = useState(false);
     const [clickState, setClickState] = useState(true);
     const [showResult, setShowResult] = useState(false);
+    const [addNew, setAddNew] = useState(false); // State to toggle between login and register forms
+
 
 
     var currentQuestion = questions[number]; // Updated the current question assignment
@@ -260,6 +264,10 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
         }
     };
 
+    const showCreateTab= ()=> {
+        setAddNew(true);
+    }
+
     useEffect(() => {
         let timerId: NodeJS.Timeout;
 
@@ -287,6 +295,7 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
     const restartGame=()=>{
         if(isLastQuestion()){
             setShowResult(false);
+            setAddNew(false);
         }
         setGameOver(true);
     }
@@ -307,14 +316,14 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
 
     return (
         <div>
-            {gameOver ?(
+            {gameOver &&!addNew ?(
                 <button className="start" onClick={startQuiz}>
                     Start
                 </button>
             ) : null}
-            {!gameOver ? <p className="score">Score: {score}</p> : null}
+            {!gameOver &&!addNew ? <p className="score">Score: {score}</p> : null}
             {loading && <p>Loading Questions ...</p>}
-            {!loading && !gameOver && !clickState && (
+            {!loading && !gameOver&&!addNew && !clickState && (
                 <>
                     <p style={{ color: 'white' }}>Time left: {timer} seconds</p>
                     <QuestionInput
@@ -331,7 +340,7 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                     />
                 </>
             )}
-            {!loading && !gameOver && clickState && (
+            {!loading && !gameOver &&!addNew && clickState && (
                 <>
                     <p style={{ color: 'white' }}>Time left: {timer} seconds</p>
                     <QuestionCard
@@ -356,7 +365,15 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                 <button className="next" onClick={restartGame}>
                     Try Again
                 </button>
+                    {!addNew &&(
+                <button className="next" onClick={showCreateTab}>
+                Create Questions
+                </button>)}
                 </>
+            )}
+
+            {addNew &&(
+                <ComponentSelector></ComponentSelector>
             )}
 
             {timerRanOut && !isLastQuestion() ?(

@@ -54,6 +54,12 @@ const InputCard: React.FC<Props> = ({
             </p>
 
             <p dangerouslySetInnerHTML={{ __html: question }}></p>
+            {!images && (
+                <LettersWrapper>
+                {letters.map((letter, index) => (
+                    <span key={index}>{letter}</span>
+                ))}
+            </LettersWrapper>)}
         </CollumnWrapper>
             <InputWrapper
                 $correct={userAnswer?.correct}

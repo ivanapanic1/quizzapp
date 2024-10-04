@@ -184,3 +184,39 @@ export async function RegisterCall(user:RegisterDTO): Promise<any>{
         alert("Logged in successfully");
         }
 }
+
+export async function createMathQuestion(question:MathQuestion): Promise<any>{
+    const response  = await fetch(`http://localhost:8080/api/math/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(question)
+    });
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    else{
+    const data = await response.json();
+    alert("Logged added new Math Question");
+    }
+}
+
+export async function createFlagMatchingQuestion(files:File[],question:CountryFlagMatchingQuestion): Promise<any>{
+    const formData = new FormData();
+    files.forEach(file=> formData.append('files', file))
+    formData.append('metadata',JSON.stringify(question))
+
+
+    const response  = await fetch(`http://localhost:8080/api/country/`, {
+            method: 'POST',
+            body:formData
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        else{
+        const data = await response.json();
+        alert("Added new Word Generator Question");
+        }
+}
