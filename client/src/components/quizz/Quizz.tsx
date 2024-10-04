@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
-    checkAnswerCallCountry,
-    checkAnswerCallMath,
-    checkAnswerCallWord,
-    fetchCountryQuestion,
+    checkAnswerCallCountry, checkAnswerCallFlag,
+    checkAnswerCallMath, checkAnswerCallWord,
+    fetchCountryQuestion, fetchFlagGuessingQuestion,
     fetchMathQuestion,
     fetchWordQuestion
 } from '../../API';
 import {
     CountryFlagMatchingQuestion,
+    FlagGuessingQuestion,
     MathQuestion,
     Question,
     WordGeneratorGame
@@ -19,7 +19,7 @@ import {Simulate} from "react-dom/test-utils";
 import {ServerAnswer} from "../../model/ServerAnswer";
 import QuestionInput from "../inputQuestion/QuestionInput";
 
-const TOTAL_QUESTIONS = 3;
+const TOTAL_QUESTIONS = 4;
 
 export type AnswerObject ={
     question:string;
@@ -61,11 +61,16 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
         return (question as CountryFlagMatchingQuestion).flagOptions !== undefined;
 
     };
-
     const isWordGeneratingQuestion = (question: Question | WordGeneratorGame): question is WordGeneratorGame => {
         if(question===undefined) return false;
         return (question as WordGeneratorGame).letters !== undefined;
     };
+    const isFlagGuessingQuestion = (question: Question | FlagGuessingQuestion): question is FlagGuessingQuestion => {
+        if(question===undefined) return false;
+        return (question as FlagGuessingQuestion).flagPath !== undefined;
+    };
+
+
 
     const answers =
         isMathQuestion(currentQuestion) ? currentQuestion.options :
@@ -73,6 +78,7 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                 isWordGeneratingQuestion(currentQuestion)? currentQuestion.letters:
             [];
 
+    const answer =isFlagGuessingQuestion(currentQuestion)?currentQuestion.flagPath:undefined;
     const expression =isMathQuestion(currentQuestion)?currentQuestion.expression:"";
 
     const determineQuestionType = (question: Question): string => {
@@ -83,6 +89,8 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                 return 'CountryFlagMatchingQuestion';
             case isWordGeneratingQuestion(question):
                 return 'WordGeneratingQuestion';
+            case isFlagGuessingQuestion(question):
+                return 'FlagGuessingQuestion';
             default: return ""
         }
     };
@@ -107,16 +115,19 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
         const newQuestion = await fetchMathQuestion()
         const countryQuestion:CountryFlagMatchingQuestion = await fetchCountryQuestion();
         const wordQuestion:WordGeneratorGame=await fetchWordQuestion();
+        const flagQuestion:FlagGuessingQuestion=await fetchFlagGuessingQuestion();
         const q: Question[] = [];
 
         q.push(newQuestion);
         q.push(countryQuestion);
         q.push(wordQuestion);
-
+        q.push(flagQuestion);
 
         setQuestions(q);
         startTimer(q[0].timeLimit);
         setNumber(0)
+        setClickState(determineQuestionType(q[0]) === 'WordGeneratingQuestion'?false:
+            determineQuestionType(q[0]) !== 'FlagGuessingQuestion' );
         setLoading(false);
         setGameOver(false);
     };
@@ -138,7 +149,9 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                 case 'WordGeneratingQuestion':
                     serverAnswer = await checkAnswerCallWord(newAnswer);
                     break;
-    
+                case 'FlagGuessingQuestion':
+                    serverAnswer= await  checkAnswerCallFlag(newAnswer);
+                    break;
             }
                     let correct = false;
 
@@ -182,7 +195,9 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                     case 'WordGeneratingQuestion':
                         serverAnswer = await checkAnswerCallWord(newAnswer);
                         break;
-    
+                    case 'FlagGuessingQuestion':
+                        serverAnswer = await checkAnswerCallFlag(newAnswer);
+                        break;
                 }
                 let correct = false;
 
@@ -222,7 +237,9 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                     case 'WordGeneratingQuestion':
                         serverAnswer = await checkAnswerCallWord({ questionId: questions[number].id, answer: 'xd' });
                         break;
-    
+                    case 'FlagGuessingQuestion':
+                        serverAnswer = await checkAnswerCallFlag({ questionId: questions[number].id, answer: 'xd' });
+                        break;
                     default:
                         console.error('Unknown question type');
                 }
@@ -281,7 +298,9 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
             setNumber(nextQuestion);
             setTimerRanOut(false);
             currentQuestion=questions[nextQuestion];
-                        startTimer(questions[nextQuestion].timeLimit);
+            setClickState(determineQuestionType(currentQuestion) === 'WordGeneratingQuestion'?false:
+                determineQuestionType(currentQuestion) !== 'FlagGuessingQuestion' );
+            startTimer(questions[nextQuestion].timeLimit);
         }
     };
     function test(s:string){console.log("hii");}
@@ -305,8 +324,10 @@ const Quiz: React.FC<QuizProps> = ({ startTrivia, score, setScore }) => {
                         questionNr={number + 1}
                         totalQuestions={TOTAL_QUESTIONS}
                         letters={answers}
-                        path={"1724604970120-austria.png"}
-                        images={true}
+                        // path={"1724604970120-austria.png"}
+                        // images={true}
+                        path={answer}
+                        images={isFlagGuessingQuestion(currentQuestion)}
                     />
                 </>
             )}
