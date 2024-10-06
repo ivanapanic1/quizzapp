@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Box, Card, CardContent, MenuItem, Select, Typography } from '@mui/material';
 import CreateMathQuestion from "../createMathQuestionComponent/CreateMathQuestion.component";
 import CreateFlagMatchingQuestion from "../createFlagMatchingQuestionComponent/flagMatchingQuestion.component";
+import CreateFlagGuessingQuestion from '../createFlagQuestionComponent/CreateFlagQuestionComponent';
+import CreateWordQuestionComponent from "../createWordGeneratorQuestionComponent/createWordQuestion.component";
+
 
 
 const ComponentSelector: React.FC = () => {
@@ -12,7 +15,11 @@ const ComponentSelector: React.FC = () => {
             case 'mathQuestion':
                 return <CreateMathQuestion/>;
             case 'flagMatching':
-                return <CreateFlagMatchingQuestion />;    
+                return <CreateFlagMatchingQuestion />;
+            case 'flagGuessing':
+                    return <CreateFlagGuessingQuestion />;
+            case 'wordQuestion':
+                    return <CreateWordQuestionComponent />;    
             default:
                 return <div>Select a component</div>;
         }
@@ -32,6 +39,8 @@ const ComponentSelector: React.FC = () => {
                     >
                         <MenuItem value="mathQuestion">Create Math Question</MenuItem>
                         <MenuItem value="flagMatching">Create Flag Matching Question</MenuItem>
+                        <MenuItem value="wordQuestion">Create Word Question</MenuItem>
+                        <MenuItem value="flagGuessing">Create Flag Guessing Question</MenuItem>
                     </Select>
                     <Box sx={{ mt: 2 }}>
                         {renderComponent()}

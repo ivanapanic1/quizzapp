@@ -4,8 +4,10 @@ import Login from "./components/LoginComponent/LoginComponent";
 import Register from "./components/registerComponent/registerComponent";
 import Quiz, {AnswerObject} from "./components/quizz/Quizz";
 import CreateMathQuestion from "./components/createMathQuestionComponent/CreateMathQuestion.component";
-import CreateFlagMatchingQuestion
-    from "./components/createFlagMatchingQuestionComponent/flagMatchingQuestion.component";
+import CreateFlagMatchingQuestion from "./components/createFlagMatchingQuestionComponent/flagMatchingQuestion.component";
+import CreateWordQuestionComponent from "./components/createWordGeneratorQuestionComponent/createWordQuestion.component";
+import CreateFlagQuestionComponent from "./components/createFlagQuestionComponent/CreateFlagQuestionComponent";
+
 
 
 

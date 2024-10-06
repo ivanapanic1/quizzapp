@@ -220,3 +220,38 @@ export async function createFlagMatchingQuestion(files:File[],question:CountryFl
         alert("Added new Word Generator Question");
         }
 }
+
+export async function createWordGeneratorQuestion(question:WordGeneratorGame): Promise<any>{
+    const response  = await fetch(`http://localhost:8080/api/word/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(question)
+    });
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    else{
+    const data = await response.json();
+    alert("Added new Word Generator Question");
+    }
+}
+export async function createFlagGuessingQuestion(file:File,question:FlagGuessingQuestion): Promise<any>{
+const formData = new FormData();
+formData.append('file', file);
+formData.append('metadata',JSON.stringify(question))
+
+
+const response  = await fetch(`http://localhost:8080/api/flag/`, {
+        method: 'POST',
+        body:formData
+    });
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    else{
+    const data = await response.json();
+    alert("Added new Word Generator Question");
+    }
+}
